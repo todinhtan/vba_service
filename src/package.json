@@ -1,0 +1,24 @@
+{
+  "name": "vba_request",
+  "version": "1.0.0",
+  "description": "VBA requests API",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.1.5",
+    "axios": "^0.17.1",
+    "body-parser": "^1.18.2",
+    "compression": "^1.7.1",
+    "cors": "^2.8.4",
+    "dotenv": "^5.0.0",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "log4js": "^3.0.6",
+    "mongoose": "^5.0.4",
+    "serve-favicon": "^2.4.5",
+    "validator": "^9.4.0"
+  }
+}
