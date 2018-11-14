@@ -38,9 +38,12 @@ export async function put(req, res) {
       if (affectedDoc) totalAffected += 1;
       else failedCountries.push(vr.country);
     }));
+
+    // 406 for no content updated
+    const httpStatus = totalAffected > 0 ? 200 : 406;
     let message = totalAffected > 0 ? `update ${totalAffected} VBA's request${totalAffected > 1 ? 's' : ''} successfully` : 'No VBA\'s request updated';
     message += failedCountries.length ? `. ${failedCountries.length > 1 ? 'Countries' : 'Country'} ${failedCountries.join(', ')} not found or APPROVED.` : '';
-    return res.json({ message }).end();
+    return res.status(httpStatus).json({ message }).end();
   } catch (error) {
     return res.status(500).send(error.stack).end();
   }
@@ -66,9 +69,12 @@ export async function post(req, res) {
       });
       if (affectedDoc) totalAffected += 1;
     }));
+
+    // 406 for no content updated
+    const httpStatus = totalAffected > 0 ? 200 : 406;
     let message = totalAffected > 0 ? `create ${totalAffected} VBA's request${totalAffected > 1 ? 's' : ''} successfully` : 'No VBA\'s request created';
     message += dupCountries.length ? `. ${dupCountries.length > 1 ? 'Countries' : 'Country'} ${dupCountries.join(', ')} duplicated.` : '';
-    return res.json({ message }).end();
+    return res.status(httpStatus).json({ message }).end();
   } catch (error) {
     return res.status(500).send(error.stack).end();
   }
