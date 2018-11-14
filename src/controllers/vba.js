@@ -8,8 +8,8 @@ export async function get(req, res) {
   try {
     const { walletId } = req.params;
     const docs = await VbaRequest.find({ walletId }).exec().catch((err) => { logger.error(err); });
-    if (docs) return res.json({ vba: docs }).end();
-    return res.json({ message: 'Not found' }).end();
+    if (docs && docs.length) return res.json({ vba: docs }).end();
+    return res.status(404).json({ message: 'Not found' }).end();
   } catch (error) {
     return res.status(500).send(error.stack).end();
   }
@@ -21,7 +21,7 @@ export async function put(req, res) {
     const vbaRequests = vbaHelper.resolveVbaRequests(req);
     const errors = vbaHelper.validateRequests(vbaRequests);
 
-    if (errors.length) return res.json({ message: 'Invalid request', errors }).end();
+    if (errors.length) return res.status(400).json({ message: 'Invalid request', errors }).end();
     let totalAffected = 0;
     const failedCountries = [];
 
@@ -52,7 +52,7 @@ export async function post(req, res) {
     const vbaRequests = vbaHelper.resolveVbaRequests(req);
     const errors = vbaHelper.validateRequests(vbaRequests);
 
-    if (errors.length) return res.json({ message: 'Invalid request', errors }).end();
+    if (errors.length) return res.status(400).json({ message: 'Invalid request', errors }).end();
 
     const dupCountries = [];
     let totalAffected = 0;
