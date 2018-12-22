@@ -16,6 +16,7 @@
     "dotenv": "^5.0.0",
     "ejs": "^2.5.7",
     "express": "^4.16.2",
+    "graylog2": "^0.2.1",
     "log4js": "^3.0.6",
     "mongoose": "^5.0.4",
     "serve-favicon": "^2.4.5",
