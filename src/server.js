@@ -7,6 +7,7 @@ import config from './config';
 import logger from './utils/logger';
 
 require('./utils/db');
+const healthcheck = require('express-healthcheck');
 
 const api = express();
 
@@ -14,7 +15,7 @@ api.use('*', cors());
 api.use(compression());
 api.use(bodyParser.urlencoded({ extended: true }));
 api.use(bodyParser.json());
-
+api.use('/v2/health', healthcheck());
 require('./routes/vba')(api);
 
 api.listen(config.server.port, (err) => {

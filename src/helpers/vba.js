@@ -3,12 +3,15 @@ import VbaRequest from '../models/vba';
 // resolve countries in request
 function resolveVbaRequests(req) {
   const { walletId } = req.params;
+  const { sessionId } = req.body;
   const postVba = req.body.vba;
   const countries = postVba.countries && Array.isArray(postVba.countries) ? Array.from(new Set(postVba.countries)) : ['US'];
   const requests = [];
   // create request for each country
   countries.forEach((country) => {
-    const vbaRequest = new VbaRequest({ walletId, country, ...postVba });
+    const vbaRequest = new VbaRequest({
+      sessionId, walletId, country, ...postVba,
+    });
     requests.push(vbaRequest);
   });
   return requests;

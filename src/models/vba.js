@@ -137,6 +137,11 @@ const VbaSchema = new mongoose.Schema(
         trim: true,
         required: true,
       },
+      merchantIdCountry: {
+        type: String,
+        trim: true,
+        required: true,
+      }
     }],
     shopName: {
       type: String,
@@ -157,7 +162,6 @@ const VbaSchema = new mongoose.Schema(
       street2: {
         type: String,
         trim: true,
-        required: true,
       },
       city: {
         type: String,
@@ -187,7 +191,6 @@ const VbaSchema = new mongoose.Schema(
     idDoc: {
       type: String,
       trim: true,
-      required: true,
     },
     coiDoc: {
       type: String,
@@ -202,6 +205,10 @@ const VbaSchema = new mongoose.Schema(
       enum: ['PENDING', 'APPROVED', 'DENIED'],
       default: 'PENDING',
     },
+    sessionId: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: { createdAt: 'created_time', updatedAt: 'updated_time' },
@@ -213,11 +220,6 @@ const VbaSchema = new mongoose.Schema(
 VbaSchema.path('repAddress.street1').required(function () {
   return this.entityType === 'CORP';
 }, 'reqAddress.street1 is required for CORP');
-
-// eslint-disable-next-line func-names
-VbaSchema.path('repAddress.street2').required(function () {
-  return this.entityType === 'CORP';
-}, 'reqAddress.street2 is required for CORP');
 
 // eslint-disable-next-line func-names
 VbaSchema.path('repAddress.city').required(function () {
@@ -273,11 +275,6 @@ VbaSchema.path('nameCn').required(function () {
 VbaSchema.path('nameEn').required(function () {
   return !this.nameCn;
 }, 'nameCn or nameEn is required');
-
-// eslint-disable-next-line func-names
-VbaSchema.path('coiDoc').required(function () {
-  return this.entityType === 'CORP';
-}, 'coiDoc is required for CORP');
 
 // index
 VbaSchema.index({ walletId: 1 });
