@@ -8,4 +8,8 @@ export default {
   server: {
     port: process.env.APP_PORT,
   },
+  graylog: {
+    host: process.env.GRAYLOG_HOST || '52.221.204.21',
+    gelfPort: process.env.GRAYLOG_GELF_PORT || 12201,
+  },
 };
