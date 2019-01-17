@@ -212,6 +212,7 @@ const VbaSchema = new mongoose.Schema(
   },
   {
     timestamps: { createdAt: 'created_time', updatedAt: 'updated_time' },
+    strict: false,
   },
 );
 

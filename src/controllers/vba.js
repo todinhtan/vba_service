@@ -1,8 +1,10 @@
 /* eslint-disable no-underscore-dangle */
+import axios from 'axios';
 import vbaHelper from '../helpers/vba';
 import VbaRequest from '../models/vba';
 import logger from '../utils/logger';
 import graylog from '../utils/logger/graylog';
+import config from '../config';
 
 // retrieve request
 export async function get(req, res) {
@@ -174,6 +176,62 @@ export async function getMultipleWallets(req, res) {
       reqType: 'CREATE',
       walletId: req.params.walletId,
       vbaRequested: JSON.stringify(req.body.vba),
+    });
+    return res.status(500).send(error.stack).end();
+  }
+}
+
+async function epiLogin(email, password) {
+  try {
+    const response = await axios.post(`${config.api.epiapi_prefix}/sessions/auth`, { email, password });
+    if (response && response.status === 200
+      && response.data && response.data.sessionId) {
+      return response.data.sessionId;
+    }
+  } catch (error) {
+    // just return null
+  }
+  return null;
+}
+
+async function _addFunds(amount, currency, srn) {
+  try {
+    if (srn === undefined || srn === null) return false;
+    const sessionId = await epiLogin('hieu@epiapi.com', '123456789sS');
+    const response = await axios.post(`${config.api.epiapi_prefix}/transfers?sessionId=${sessionId}`, {
+      autoConfirm: true,
+      callbackUrl: 'http://requestbin.net/r/t18808t1?inspect',
+      sourceCurrency: currency,
+      destCurrency: currency,
+      sourceAmount: amount,
+      source: 'service:Fiat Credits',
+      dest: srn,
+    });
+    if (response && response.status === 200) return true;
+  } catch (error) {
+    // just return null
+  }
+
+  return true;
+}
+
+export async function addFunds(req, res) {
+  try {
+    const { userId } = req.params;
+    const { fund, currency } = req.body;
+
+    const doc = await VbaRequest.findOne({ 'vbaData.userId': userId, country: 'US' }).exec()
+      .catch((err) => { logger.error(err); });
+    if (doc) {
+      const isSuccess = await _addFunds(fund, currency, `wallet:${doc.walletId}`);
+      return isSuccess ? res.status(200).send(`Funds has been added for user ${userId}`).end()
+        : res.status(406).send(`Cannot add funds to ${userId}`).end();
+    }
+    return res.status(400).send(`No VBA request found for user ${userId}`).end();
+  } catch (error) {
+    graylog.critical(error.message, error.stack, {
+      reqType: 'ADD_FUNDS',
+      req: JSON.stringify(req.body),
     });
     return res.status(500).send(error.stack).end();
   }
