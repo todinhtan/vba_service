@@ -212,7 +212,7 @@ async function _addFunds(amount, currency, srn) {
     // just return null
   }
 
-  return true;
+  return false;
 }
 
 export async function addFunds(req, res) {
