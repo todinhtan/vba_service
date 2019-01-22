@@ -1,4 +1,4 @@
-import { get, put, post, getMultipleWallets, updateAllWalletRequests, addFunds } from '../controllers/vba';
+import { get, put, post, getMultipleWallets, updateAllWalletRequests, addFunds, updateVbaData } from '../controllers/vba';
 
 module.exports = (api) => {
   api.route('/vba/').post(getMultipleWallets);
@@ -6,6 +6,7 @@ module.exports = (api) => {
   api.route('/vba/:walletId').put(put);
   api.route('/vba/:walletId/document').put(updateAllWalletRequests);
   api.route('/vba/:walletId').post(post);
+  api.route('/vba/:walletId/vbaData/:country').post(updateVbaData);
 
   // add funds
   api.route('/add-funds/synapse/:userId').post(addFunds);
