@@ -240,9 +240,9 @@ export async function addFunds(req, res) {
 export async function updateVbaData(req, res) {
   try {
     const { walletId, country } = req.params;
-    const updatedDoc = await VbaRequest.findOneAndUpdate({ walletId, country }, { $set: { vbaData: req.body } }, { new: true })
+    const updatedDoc = await VbaRequest.findOneAndUpdate({ walletId, country }, { $set: { walletId, country, vbaData: req.body, status: 'APPROVED' } }, { new: true, upsert: true })
       .catch((err) => { logger.error(err); });
-    return (updatedDoc) ? res.status(200).json(updatedDoc).end() : res.status(404).send('Not found').end();
+    return (updatedDoc) ? res.status(200).json(updatedDoc).end() : res.status(500).send('Internal server error').end();
   } catch (error) {
     graylog.critical(error.message, error.stack, {
       reqType: 'UPDATE_VBA_DATA',
