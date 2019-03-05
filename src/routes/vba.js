@@ -9,5 +9,5 @@ module.exports = (api) => {
   api.route('/vba/:walletId/vbaData/:country').post(updateVbaData);
 
   // add funds
-  api.route('/add-funds/synapse/:userId').post(addFunds);
+  api.route('/add-funds/synapse').post(addFunds);
 };
