@@ -216,7 +216,6 @@ async function _addFunds(amount, sourceCurrency, destCurrency, message, walletId
 }
 
 export async function addFunds(req, res) {
-  console.log('test');
   try {
     const allowedCurrency = ['USD'];
     const {
