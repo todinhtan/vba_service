@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 import vbaHelper from '../helpers/vba';
@@ -260,6 +262,32 @@ export async function updateVbaData(req, res) {
   } catch (error) {
     graylog.critical(error.message, error.stack, {
       reqType: 'UPDATE_VBA_DATA',
+      req: JSON.stringify(req.body),
+    });
+    return res.status(500).send(error.stack).end();
+  }
+}
+
+export async function getWalletByUserId(req, res) {
+  try {
+    const { userId } = req.params;
+    const vbaRequests = await VbaRequest.find({ 'vbaData.userId': userId })
+      .catch((err) => { logger.error(err); });
+    if (vbaRequests && vbaRequests.length) {
+      const sessionId = await epiLogin('hieu@epiapi.com', '123456789sS');
+      const walletDetails = [];
+      for (const vr of vbaRequests) {
+        const response = await axios.get(`${config.api.epiapi_prefix}/wallet?walletId=${vr.walletId}&sessionId=${sessionId}`);
+        if (response && response.status === 200 && response.data) {
+          walletDetails.push(response.data);
+        }
+      }
+      return res.json(walletDetails).end();
+    }
+    return res.status(404).send('No wallet found!!').end();
+  } catch (error) {
+    graylog.critical(error.message, error.stack, {
+      reqType: 'GET_WALLET_BY_USERID',
       req: JSON.stringify(req.body),
     });
     return res.status(500).send(error.stack).end();
