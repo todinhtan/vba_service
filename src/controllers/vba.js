@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 import vbaHelper from '../helpers/vba';
@@ -194,18 +196,18 @@ async function epiLogin(email, password) {
   return null;
 }
 
-async function _addFunds(amount, currency, srn) {
+async function _addFunds(amount, sourceCurrency, destCurrency, message, walletId) {
   try {
-    if (srn === undefined || srn === null) return false;
+    if (walletId === undefined || walletId === null) return false;
     const sessionId = await epiLogin('hieu@epiapi.com', '123456789sS');
     const response = await axios.post(`${config.api.epiapi_prefix}/transfers?sessionId=${sessionId}`, {
-      autoConfirm: true,
-      callbackUrl: 'http://requestbin.net/r/t18808t1?inspect',
-      sourceCurrency: currency,
-      destCurrency: currency,
-      sourceAmount: amount,
+      autoConfirm: false,
+      sourceCurrency,
+      destCurrency,
+      amount,
       source: 'service:Fiat Credits',
-      dest: srn,
+      dest: walletId,
+      message,
     });
     if (response && response.status === 200) return true;
   } catch (error) {
@@ -217,13 +219,27 @@ async function _addFunds(amount, currency, srn) {
 
 export async function addFunds(req, res) {
   try {
-    const { userId } = req.params;
-    const { fund, currency } = req.body;
+    const allowedCurrency = ['USD'];
+    const {
+      amount,
+      message,
+      sourceCurrency,
+      destCurrency,
+    } = req.body;
+
+    if (!allowedCurrency.includes(sourceCurrency)) return res.status(400).send(`Currency ${sourceCurrency} is not supported`).end();
+    if (!allowedCurrency.includes(destCurrency)) return res.status(400).send(`Currency ${destCurrency} is not supported`).end();
+
+    const userIdMatches = message.match(/(userId:)[a-zA-Z0-9]+/g);
+    if (!userIdMatches || userIdMatches.length < 1) return res.status(400).send('Message does not contain userId').end();
+    if (userIdMatches.length > 1) return res.status(400).send('Message contains multiple userId').end();
+
+    const userId = userIdMatches[0].replace('userId:', '');
 
     const doc = await VbaRequest.findOne({ 'vbaData.userId': userId, country: 'US' }).exec()
       .catch((err) => { logger.error(err); });
     if (doc) {
-      const isSuccess = await _addFunds(fund, currency, `wallet:${doc.walletId}`);
+      const isSuccess = await _addFunds(amount, sourceCurrency, destCurrency, '', doc.walletId);
       return isSuccess ? res.status(200).send(`Funds has been added for user ${userId}`).end()
         : res.status(406).send(`Cannot add funds to ${userId}`).end();
     }
@@ -246,6 +262,32 @@ export async function updateVbaData(req, res) {
   } catch (error) {
     graylog.critical(error.message, error.stack, {
       reqType: 'UPDATE_VBA_DATA',
+      req: JSON.stringify(req.body),
+    });
+    return res.status(500).send(error.stack).end();
+  }
+}
+
+export async function getWalletByUserId(req, res) {
+  try {
+    const { userId } = req.params;
+    const vbaRequests = await VbaRequest.find({ 'vbaData.userId': userId })
+      .catch((err) => { logger.error(err); });
+    if (vbaRequests && vbaRequests.length) {
+      const sessionId = await epiLogin('hieu@epiapi.com', '123456789sS');
+      const walletDetails = [];
+      for (const vr of vbaRequests) {
+        const response = await axios.get(`${config.api.epiapi_prefix}/wallet?walletId=${vr.walletId}&sessionId=${sessionId}`);
+        if (response && response.status === 200 && response.data) {
+          walletDetails.push(response.data);
+        }
+      }
+      return res.json(walletDetails).end();
+    }
+    return res.status(404).send('No wallet found!!').end();
+  } catch (error) {
+    graylog.critical(error.message, error.stack, {
+      reqType: 'GET_WALLET_BY_USERID',
       req: JSON.stringify(req.body),
     });
     return res.status(500).send(error.stack).end();
