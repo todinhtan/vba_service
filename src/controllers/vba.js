@@ -7,6 +7,7 @@ import VbaRequest from '../models/vba';
 import logger from '../utils/logger';
 import graylog from '../utils/logger/graylog';
 import config from '../config';
+import { epiLogin } from '../helpers/epiapi';
 
 // retrieve request
 export async function get(req, res) {
@@ -181,19 +182,6 @@ export async function getMultipleWallets(req, res) {
     });
     return res.status(500).send(error.stack).end();
   }
-}
-
-async function epiLogin(email, password) {
-  try {
-    const response = await axios.post(`${config.api.epiapi_prefix}/sessions/auth`, { email, password });
-    if (response && response.status === 200
-      && response.data && response.data.sessionId) {
-      return response.data.sessionId;
-    }
-  } catch (error) {
-    // just return null
-  }
-  return null;
 }
 
 async function _addFunds(amount, sourceCurrency, destCurrency, message, walletId) {
