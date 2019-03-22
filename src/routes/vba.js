@@ -9,6 +9,8 @@ import {
   getWalletByUserId,
 } from '../controllers/vba';
 
+import { completeTransfer } from '../controllers/transfer';
+
 module.exports = (api) => {
   api.route('/vba/').post(getMultipleWallets);
   api.route('/vba/:walletId').get(get);
@@ -22,4 +24,7 @@ module.exports = (api) => {
 
   // get wallets by userId
   api.route('/user/:userId/wallets').get(getWalletByUserId);
+
+  // add transfer routes
+  api.route('/callbacks/complete-transfer').post(completeTransfer);
 };
