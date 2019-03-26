@@ -17,9 +17,9 @@ api.use(compression());
 api.use(bodyParser.urlencoded({ extended: true }));
 api.use(bodyParser.json());
 api.use('/v2/health', healthcheck());
-api.use(basicAuth({
-  users: { admin: 'adm1nadm1n' },
-}));
+// api.use(basicAuth({
+//   users: { admin: '123456@stg' },
+// }));
 require('./routes/vba')(api);
 
 api.listen(config.server.port, (err) => {
