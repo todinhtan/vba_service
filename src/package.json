@@ -21,6 +21,7 @@
     "graylog2": "^0.2.1",
     "log4js": "^3.0.6",
     "mongoose": "^5.0.4",
+    "morgan": "^1.9.1",
     "serve-favicon": "^2.4.5",
     "validator": "^9.4.0"
   }
