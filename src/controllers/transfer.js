@@ -66,7 +66,7 @@ export async function completeTransfer(req, res) {
 
     // check if sourceAmount's values do not match
     // eslint-disable-next-line eqeqeq
-    if (!sourceAmount || sourceAmount != transfer.sourceAmount) return res.status(400).json({ errors: ['Transfer\'s sourceAmounts are not matched'] }).end();
+    if (!sourceAmount || sourceAmount != transfer.destAmount) return res.status(400).json({ errors: ['Transfer\'s sourceAmount are not matched'] }).end();
 
     // finalise transfer
     const finaliseResult = await finaliseTransfer(sessionId, message);

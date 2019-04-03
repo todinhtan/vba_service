@@ -20,7 +20,7 @@ const api = express();
 
 api.use('*', cors())
   .use(compression())
-  .use(morgan(':method :url :status :reqBody - :response-time ms'))
+  .use(morgan(':date[iso] - :method :url :status :reqBody - :response-time ms'))
   .use(bodyParser.urlencoded({ extended: true }))
   .use(bodyParser.json())
   .use('/v2/health', healthcheck());
