@@ -200,12 +200,12 @@ async function _addFunds(amount, sourceCurrency, destCurrency, message, walletId
       dest: `wallet:${walletId}`,
       message: 'addenda',
     });
-    if (response && response.status === 200) return true;
+    if (response && response.status === 200) return response.data;
   } catch (error) {
     logger.error(error);
   }
 
-  return false;
+  return null;
 }
 
 export async function addFunds(req, res) {
@@ -231,8 +231,8 @@ export async function addFunds(req, res) {
     const doc = await VbaRequest.findOne({ 'vbaData.userId': userId, country: 'US' }).exec()
       .catch((err) => { logger.error(err); });
     if (doc) {
-      const isSuccess = await _addFunds(amount, sourceCurrency, destCurrency, '', doc.walletId);
-      return isSuccess ? res.status(200).send(`Funds has been added for user ${userId}`).end()
+      const newTransfer = await _addFunds(amount, sourceCurrency, destCurrency, '', doc.walletId);
+      return newTransfer ? res.status(200).send({ message: `Funds has been added for user ${userId}`, transfer: newTransfer }).end()
         : res.status(406).send(`Cannot add funds to ${userId}`).end();
     }
     return res.status(400).send(`No VBA request found for user ${userId}`).end();
