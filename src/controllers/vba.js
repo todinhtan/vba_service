@@ -195,14 +195,14 @@ async function _addFunds(amount, sourceCurrency, destCurrency, message, walletId
       autoConfirm: false,
       sourceCurrency,
       destCurrency,
-      amount,
+      sourceAmount: amount,
       source: 'service:Fiat Credits',
-      dest: walletId,
-      message,
+      dest: `wallet:${walletId}`,
+      message: 'addenda',
     });
     if (response && response.status === 200) return true;
   } catch (error) {
-    logger.error(error.stack);
+    logger.error(error);
   }
 
   return false;
@@ -221,11 +221,12 @@ export async function addFunds(req, res) {
     if (!allowedCurrency.includes(sourceCurrency)) return res.status(400).send(`Currency ${sourceCurrency} is not supported`).end();
     if (!allowedCurrency.includes(destCurrency)) return res.status(400).send(`Currency ${destCurrency} is not supported`).end();
 
-    const userIdMatches = message.match(/(userId:)[a-zA-Z0-9]+/g);
-    if (!userIdMatches || userIdMatches.length < 1) return res.status(400).send('Message does not contain userId').end();
-    if (userIdMatches.length > 1) return res.status(400).send('Message contains multiple userId').end();
+    // const userIdMatches = message.match(/(userId:)[a-zA-Z0-9]+/g);
+    // if (!userIdMatches || userIdMatches.length < 1) return res.status(400).send('Message does not contain userId').end();
+    // if (userIdMatches.length > 1) return res.status(400).send('Message contains multiple userId').end();
 
-    const userId = userIdMatches[0].replace('userId:', '');
+    // const userId = userIdMatches[0].replace('userId:', '');
+    const userId = message;
 
     const doc = await VbaRequest.findOne({ 'vbaData.userId': userId, country: 'US' }).exec()
       .catch((err) => { logger.error(err); });
